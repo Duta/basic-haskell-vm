@@ -26,6 +26,9 @@ repr :: Value -> String
 repr (S s) = s
 repr (I n) = show n
 
+vmError :: String -> a
+vmError = error . ("VM Runtime Error: "++)
+
 exeIns :: Memory -> Instruction -> IO Memory
 exeIns (s, v)         (Const n) = return (n:s, v)
 exeIns (I b:I a:s, v) Add       = return (I (a + b):s, v)
@@ -33,7 +36,9 @@ exeIns (b:a:s, v)     Add       = return (S (repr a ++ repr b):s, v)
 exeIns (b:a:s, v)     Flip      = return (a:b:s, v)
 exeIns (n:s, v)       Print     = putStr (repr n) >> return (s, v)
 exeIns (n:s, v)       (Store i) = return (s, M.insert i n v)
-exeIns (s, v)         (Load i)  = return (v M.! i:s, v)
+exeIns (s, v)         (Load i)  = case M.lookup i v of
+                                    (Just n) -> return (n:s, v)
+                                    Nothing -> vmError $ "Attempted to access undefined variable " ++ i
 
 exeCode :: Memory -> Bytecode -> IO Memory
 exeCode = foldM exeIns

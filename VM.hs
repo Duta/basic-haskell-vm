@@ -41,6 +41,17 @@ exeCode = foldM exeIns
 initialMem :: Memory
 initialMem = ([], M.empty)
 
+{-
+Util function.
+Takes two variable names and swaps their values.
+-}
+swap :: String -> String -> Bytecode
+swap a b = [
+  Load a,
+  Load b,
+  Store a,
+  Store b]
+
 main :: IO ()
 main = do
   putStrLn "Executing..."

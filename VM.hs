@@ -40,3 +40,32 @@ exeCode = foldM exeIns
 
 initialMem :: Memory
 initialMem = ([], M.empty)
+
+main :: IO ()
+main = do
+  putStrLn "Executing..."
+  mem <- exeCode initialMem example1
+  putStrLn "Done."
+  putStrLn "Stack memory:"
+  print $ fst mem
+  putStrLn "Variable memory:"
+  print $ snd mem
+
+example1 :: Bytecode
+example1 = [
+  -- print("I got ")
+  Const $ S "I got ",
+  Print,
+  -- answer = 10 + 32
+  Const $ I 10,
+  Const $ I 32,
+  Add,
+  Store "answer",
+  -- print(57 + answer)
+  Const $ I 57,
+  Load "answer",
+  Add,
+  Print,
+  -- print(" problems\n")
+  Const $ S " problems\n",
+  Print]

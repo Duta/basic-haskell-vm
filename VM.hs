@@ -69,3 +69,16 @@ example1 = [
   -- print(" problems\n")
   Const $ S " problems\n",
   Print]
+
+example2 :: Bytecode
+example2 = [
+  -- num_problems = 99
+  Const $ I 99,
+  Store "num_problems",
+  -- print("I got " + num_problems + " problems\n")
+  Const $ S "I got ",
+  Load "num_problems",
+  Add,
+  Const $ S " problems\n",
+  Add,
+  Print]

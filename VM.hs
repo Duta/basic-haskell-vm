@@ -29,13 +29,20 @@ repr (I n) = show n
 vmError :: String -> a
 vmError = error . ("VM Runtime Error: "++)
 
+stackUnderflowError :: a
+stackUnderflowError = vmError "Stack underflow"
+
 exeIns :: Memory -> Instruction -> IO Memory
 exeIns (s, v)         (Const n) = return (n:s, v)
 exeIns (I b:I a:s, v) Add       = return (I (a + b):s, v)
 exeIns (b:a:s, v)     Add       = return (S (repr a ++ repr b):s, v)
+exeIns _              Add       = stackUnderflowError
 exeIns (b:a:s, v)     Flip      = return (a:b:s, v)
+exeIns _              Flip      = stackUnderflowError
 exeIns (n:s, v)       Print     = putStr (repr n) >> return (s, v)
+exeIns _              Print     = stackUnderflowError
 exeIns (n:s, v)       (Store i) = return (s, M.insert i n v)
+exeIns _              (Store i) = stackUnderflowError
 exeIns (s, v)         (Load i)  = case M.lookup i v of
                                     (Just n) -> return (n:s, v)
                                     Nothing -> vmError $ "Attempted to access undefined variable " ++ i
@@ -46,10 +53,7 @@ exeCode = foldM exeIns
 initialMem :: Memory
 initialMem = ([], M.empty)
 
-{-
-Util function.
-Takes two variable names and swaps their values.
--}
+-- Takes two variable names and swaps their values.
 swap :: String -> String -> Bytecode
 swap a b = [
   Load a,
